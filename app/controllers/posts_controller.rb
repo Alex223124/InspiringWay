@@ -1,5 +1,5 @@
 class PostsController < ApplicationController
-  before_action :find_post, only: [:show, :edit, :update, :destroy]
+  before_action :find_post, only: [:show, :edit, :update, :destroy, :upvote, :downvote]
   before_action :authenticate_user!, except: [:index, :show]
   
   def index
@@ -7,7 +7,8 @@ class PostsController < ApplicationController
   end
   
   def show
-
+    @comments = Comment.where(post_id: @post)
+    @random_post = Post.where.not(id: @post).order("RANDOM()").first
   end
   
   def new
@@ -40,6 +41,16 @@ class PostsController < ApplicationController
     redirect_to root_path 
   end
   
+  def upvote
+    @post.upvote_by current_user
+    redirect_to :back
+  end
+  
+  def downvote
+    @post.downvote_by current_user
+    redirect_to :back
+  end
+  
   private
   
   def find_post
@@ -49,6 +60,4 @@ class PostsController < ApplicationController
   def post_params
     params.require(:post).permit(:title, :link, :description, :image)
   end
-  
-  
 end
